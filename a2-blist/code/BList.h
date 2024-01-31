@@ -2,7 +2,7 @@
  * \file      BList.h
  * \author    Benjamin Lee
  * \par       DP email: benjaminzhiyuan.lee\@digipen.edu.sg
- * \par       Course: 
+ * \par       Course: CSD2183
  * \par       Section: A
  * \par      
  * \date      31-01-2024

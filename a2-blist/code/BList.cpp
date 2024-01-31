@@ -2,8 +2,8 @@
  * \file      BList.cpp
  * \author    Benjamin Lee
  * \par       DP email: benjaminzhiyuan.lee\@digipen.edu.sg
- * \par       Course: 
- * \par       Section: B
+ * \par       Course: CSD2183
+ * \par       Section: A
  * \par      
  * \date      31-01-2024
  * 
