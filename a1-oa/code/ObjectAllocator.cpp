@@ -9,3 +9,9 @@
  * 
  * \brief  
  *********************************************************************/
+
+#include "ObjectAllocator.h"
+#include <cstdint>
+#include <cstring>
+#include <cstdlib>
+

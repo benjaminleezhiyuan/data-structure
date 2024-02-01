@@ -16,7 +16,7 @@
 //---------------------------------------------------------------------------
 
 #include <string>
-
+#include <iostream>
 // If the client doesn't specify these:
 static const int DEFAULT_OBJECTS_PER_PAGE = 4;  
 static const int DEFAULT_MAX_PAGES = 3;
@@ -277,6 +277,7 @@ class ObjectAllocator
     GenericObject *FreeList_; //!< the beginning of the list of objects
     
     // Lots of other private stuff... 
+    void Newpage();
 };
 
 #endif
