@@ -7,7 +7,7 @@
  * \par      
  * \date      29-02-2024
  * 
- * \brief  
+ * \brief     This file contains the definition for the BSTree class.
  *********************************************************************/
 /******************************************************************************/
 //---------------------------------------------------------------------------
@@ -116,22 +116,38 @@ class BSTree
     int tree_height(BinTree tree) const;
     void find_predecessor(BinTree tree, BinTree &predecessor) const;
 
-    BinTree root_node;
-    unsigned int size_;
-    int height_;
+    BinTree rootNode;
+    unsigned int sizeOfTree;
+    int heightOfTree;
     ObjectAllocator* OA;
-    bool free_OA;
-    bool share_OA;
+    bool freeOA;
+    bool shareOA;
 
   private:
     // private stuff...
+    void InitializeAllocator(ObjectAllocator* oa, bool shareOA);
     void CopyTree(const BinTree& source, BinTree& dest);
+    void HandleObjectAllocator(const BSTree& rhs);
     void FreeTree(BinTree tree);
+    void FreeSubtree(BinTree tree);
     void InsertNode(BinTree& node, const T& value, int depth);
+    void HandleNewNodeCreation(BinTree& node, const T& value, int depth);
+    void IncrementNodeCount(BinTree& node);
     void DeleteNode(BinTree& node, const T& value);
+    void DecrementNodeCount(BinTree& node);
+    void HandleNodeDeletion(BinTree& node);
+    void ReplaceNodeWithRightChild(BinTree& node);
+    void ReplaceNodeWithLeftChild(BinTree& node);
     bool FindNode(BinTree node, const T& value, unsigned& compares) const;
     BinTree FindNodeAtIndex(BinTree tree, unsigned index) const;
+    BinTree FindNodeAtIndexRecursive(BinTree tree, unsigned index) const;
+    unsigned int CountLeftSubtreeNodes(BinTree tree) const;
+    BinTree AllocateMemory() const;
+    BinTree CreateNode(BinTree alloc, const T& value) const;
+    int CalculateTreeHeight(BinTree tree) const;
+    BinTree FindRightmostNode(BinTree node) const;
 };
+
 
 #include "BSTree.cpp"
 

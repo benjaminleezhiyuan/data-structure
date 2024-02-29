@@ -7,7 +7,7 @@
  * \par      
  * \date      29-02-2024
  * 
- * \brief  
+ * \brief     This file contains the definition for the AVL Tree class.
  *********************************************************************/
 /******************************************************************************/
 //---------------------------------------------------------------------------
@@ -29,7 +29,7 @@ class AVLTree : public BSTree<T>
     virtual void insert(const T& value) override;
     virtual void remove(const T& value) override;
 
-      // Returns true if efficiency implemented
+    // Returns true if efficiency implemented
     static bool ImplementedBalanceFactor(void);
 
   private:
