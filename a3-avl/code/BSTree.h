@@ -1,3 +1,15 @@
+/*!******************************************************************
+ * \file      BSTree.h
+ * \author    Benjamin Lee
+ * \par       DP email: benjaminzhiyuan.lee\@digipen.edu.sg
+ * \par       Course: 
+ * \par       Section: 
+ * \par      
+ * \date      29-02-2024
+ * 
+ * \brief  
+ *********************************************************************/
+/******************************************************************************/
 //---------------------------------------------------------------------------
 #ifndef BSTREE_H
 #define BSTREE_H
@@ -81,7 +93,7 @@ class BSTree
     };
 
     //! shorthand
-    typedef BinTreeNode* BinTree;
+    using BinTree = BinTreeNode*;
 
     BSTree(ObjectAllocator *oa = 0, bool ShareOA = false);
     BSTree(const BSTree& rhs);
@@ -104,9 +116,21 @@ class BSTree
     int tree_height(BinTree tree) const;
     void find_predecessor(BinTree tree, BinTree &predecessor) const;
 
+    BinTree root_node;
+    unsigned int size_;
+    int height_;
+    ObjectAllocator* OA;
+    bool free_OA;
+    bool share_OA;
+
   private:
     // private stuff...
-
+    void CopyTree(const BinTree& source, BinTree& dest);
+    void FreeTree(BinTree tree);
+    void InsertNode(BinTree& node, const T& value, int depth);
+    void DeleteNode(BinTree& node, const T& value);
+    bool FindNode(BinTree node, const T& value, unsigned& compares) const;
+    BinTree FindNodeAtIndex(BinTree tree, unsigned index) const;
 };
 
 #include "BSTree.cpp"
