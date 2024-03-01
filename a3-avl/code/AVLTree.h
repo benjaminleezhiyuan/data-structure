@@ -34,16 +34,29 @@ class AVLTree : public BSTree<T>
 
   private:
     using BinTree = typename BSTree<T>::BinTree;
+    void LeftRotate(BinTree& tree);
     using Stack = std::stack<BinTree *>;
+    void AVLBalance(Stack& visited);
     // private stuff
-    void InsertAVL(BinTree& tree, const T& value, Stack& visited);
-    void RemoveAVL(BinTree& tree, const T& value, Stack& visited);
-    void BalanceAVL(Stack& visited);
     
-    void RotateLeft(BinTree& tree);
-    void RotateRight(BinTree& tree);
     unsigned int CountTree(BinTree& tree);
-    void RecountAVL(BinTree& tree);
+    void AVLRecount(BinTree& tree);
+    void InsertRight(BinTree &tree, const T &value, Stack &visited);
+    void RightRotate(BinTree& tree);
+
+    // Helper functions
+    void InsertLeft(BinTree &tree, const T &value, Stack &visited);
+
+    // Helper functions for removal
+    void LeftRemove(BinTree &tree, const T &value, Stack &visited);
+    void RightRemove(BinTree &tree, const T &value, Stack &visited);
+    
+    void RightBalance(BinTree *node);
+    void LeftBalance(BinTree *node);
+    void AVLRemove(BinTree& tree, const T& value, Stack& visited);
+    void AVLInsert(BinTree& tree, const T& value, Stack& visited);
+    
+    
 };
 
 #include "AVLTree.cpp"
