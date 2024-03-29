@@ -11,15 +11,16 @@
  *********************************************************************/
 
 #include "Sudoku.h"
-/******************************************************************************/
-/*!
-\brief
-  This is the constructor for a Sudoku.
-\param basesize, the width of a box.
-\param stype, the symbol to use for the sudoku, alphabets or numbers.
-\param callback, a callback defined by a client used for tracking steps.
-*/
-/******************************************************************************/
+
+/**
+ * @brief Constructs a Sudoku object.
+ *
+ * This constructor initializes a Sudoku object with the specified parameters.
+ *
+ * @param basesize The size of the base grid. This determines the size of each sub-grid in the Sudoku puzzle.
+ * @param stype The symbol type used in the Sudoku puzzle.
+ * @param callback The callback function to be called when a solution is found.
+ */
 Sudoku::Sudoku(int basesize, SymbolType stype, SUDOKU_CALLBACK callback)
     : symbol_t{stype}, cb{callback}
 {
@@ -28,37 +29,43 @@ Sudoku::Sudoku(int basesize, SymbolType stype, SUDOKU_CALLBACK callback)
   board = new char[length * length];
 }
 
-/******************************************************************************/
-/*!
-\brief
-  This is the destructor for a Sudoku.
-*/
-/******************************************************************************/
+
+/**
+ * @brief Destructor for the Sudoku class.
+ * 
+ * This destructor is responsible for cleaning up any resources
+ * allocated by the Sudoku class.
+ */
 Sudoku::~Sudoku()
 {
   delete[] board;
 }
 
-/******************************************************************************/
-/*!
-\brief
-  This functions sets up the starting board based on a string of values.
-\param values, a string of values representing the start state.
-\param size the size of the board.
-*/
-/******************************************************************************/
+
+/**
+ * @brief Sets up the Sudoku board with the given values.
+ * 
+ * This function takes an array of characters representing the initial values of the Sudoku board,
+ * and sets up the board accordingly. The size parameter specifies the number of elements in the array.
+ * 
+ * @param values An array of characters representing the initial values of the Sudoku board.
+ * @param size The number of elements in the values array.
+ */
 void Sudoku::SetupBoard(const char *values, size_t size)
 {
   for (size_t i = 0; i < size; ++i)
     board[i] = values[i] == '.' ? EMPTY_CHAR : values[i];
 }
 
-/******************************************************************************/
-/*!
-\brief
-  This function is called by the client to solve a this sudoku.
-*/
-/******************************************************************************/
+
+/**
+ * Solves the Sudoku puzzle.
+ * This function uses a backtracking algorithm to find the solution for the Sudoku puzzle.
+ * It starts by finding an empty cell in the puzzle and tries different numbers (1-9) in that cell.
+ * If a number is valid, it moves to the next empty cell and repeats the process.
+ * If a number is not valid, it backtracks to the previous cell and tries a different number.
+ * This process continues until a valid solution is found or all possibilities are exhausted.
+ */
 void Sudoku::Solve()
 {
   unsigned x = 0;
@@ -72,39 +79,38 @@ void Sudoku::Solve()
     cb(*this, board, MessageType::MSG_FINISHED_FAIL, stats.moves, stats.basesize, -1, 0);
 }
 
-/******************************************************************************/
-/*!
-\brief
-  Getter for board.
-\return board.
-*/
-/******************************************************************************/
+
+/**
+ * @brief Get the current state of the Sudoku board.
+ * 
+ * @return const char* A pointer to the Sudoku board.
+ */
 const char *Sudoku::GetBoard() const
 {
   return board;
 }
 
-/******************************************************************************/
-/*!
-\brief
-  Getter for stats.
-\return stats.
-*/
-/******************************************************************************/
+
+/**
+ * @class SudokuStats
+ * @brief Represents the statistics of a Sudoku puzzle.
+ *
+ * This class stores the statistics related to a Sudoku puzzle, such as the number of solved cells,
+ * the number of backtracks performed, and the time taken to solve the puzzle.
+ */
 Sudoku::SudokuStats Sudoku::GetStats() const
 {
   return stats;
 }
 
-/******************************************************************************/
-/*!
-\brief
-  This function tries to place a value at a position on the board.
-\param x, x coord of the position.
-\param y, y coord of the position.
-\return this function returns true if a value is placed else false.
-*/
-/******************************************************************************/
+
+/**
+ * Places a value in the Sudoku grid at the specified coordinates.
+ *
+ * @param x The x-coordinate of the cell in the grid.
+ * @param y The y-coordinate of the cell in the grid.
+ * @return True if the value was successfully placed, false otherwise.
+ */
 bool Sudoku::place_value(unsigned x, unsigned y)
 {
   if (y == length)
@@ -164,16 +170,15 @@ bool Sudoku::place_value(unsigned x, unsigned y)
   return false;
 }
 
-/******************************************************************************/
-/*!
-\brief
-  This function checks if a placement is valid for a given value.
-\param x, x coord of the position.
-\param y, y coord of the position.
-\param val, value of the placement.
-\return this function returns true if a value placed is valid.
-*/
-/******************************************************************************/
+
+/**
+ * Checks if a move is valid in the Sudoku grid.
+ *
+ * @param x The x-coordinate of the cell.
+ * @param y The y-coordinate of the cell.
+ * @param val The value to be placed in the cell.
+ * @return True if the move is valid, false otherwise.
+ */
 bool Sudoku::CheckValidMove(unsigned x, unsigned y, char val)
 {
   auto index = x + length * y;
