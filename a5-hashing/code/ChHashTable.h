@@ -158,6 +158,20 @@ private:
   ChHTHeadNode *head;
 
   mutable HTStats stats;
+
+  // Helper function declarations
+  void check_resize();
+
+  unsigned find_index(const char *Key) const;
+
+  bool find_key_in_list(const char *Key, ChHTNode *list) const;
+
+  void insert_into_list(const char *Key, const T &Data, ChHTNode *&list);
+
+  void remove_node_from_list(ChHTNode *current, ChHTNode *previous, ChHTHeadNode *table_head);
+
+  const T &search_key_in_list(const char *Key, ChHTNode *list) const;
+
 };
 
 #include "ChHashTable.cpp"

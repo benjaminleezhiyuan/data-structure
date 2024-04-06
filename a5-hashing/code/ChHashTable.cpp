@@ -48,7 +48,81 @@ ChHashTable<T>::~ChHashTable()
 /******************************************************************************/
 /*!
 \brief
-  This function inserts a data into the hash table with a key.
+  Checks if the table needs to be resized based on the current load factor.
+*/
+/******************************************************************************/
+template <typename T>
+void ChHashTable<T>::check_resize()
+{
+  const auto current_load_factor =
+      ((stats.Count_ + 1) / static_cast<double>(stats.TableSize_));
+
+  if (current_load_factor > config.MaxLoadFactor_)
+    grow_table();
+}
+
+/******************************************************************************/
+/*!
+\brief
+  Finds the index in the table for a given key using the hash function.
+\param Key, the key for which the index is calculated.
+\return unsigned, the index in the table.
+*/
+/******************************************************************************/
+template <typename T>
+unsigned ChHashTable<T>::find_index(const char *Key) const
+{
+  return config.HashFunc_(Key, stats.TableSize_);
+}
+
+/******************************************************************************/
+/*!
+\brief
+  Searches for a key in a given linked list.
+\param Key, the key to search for.
+\param list, the linked list to search in.
+\return bool, true if the key is found, false otherwise.
+*/
+/******************************************************************************/
+template <typename T>
+bool ChHashTable<T>::find_key_in_list(const char *Key, ChHTNode *list) const
+{
+  while (list)
+  {
+    ++stats.Probes_;
+
+    if (strncmp(Key, list->Key, MAX_KEYLEN) == 0)
+      return true;
+
+    list = list->Next;
+  }
+
+  return false;
+}
+
+/******************************************************************************/
+/*!
+\brief
+  Inserts a new node into a given linked list.
+\param Key, the key for the new node.
+\param Data, the data for the new node.
+\param list, the linked list to insert into.
+*/
+/******************************************************************************/
+template <typename T>
+void ChHashTable<T>::insert_into_list(const char *Key, const T &Data, ChHTNode *&list)
+{
+  ChHTNode *new_node = make_node(Data);
+  strncpy(new_node->Key, Key, MAX_KEYLEN);
+
+  new_node->Next = list;
+  list = new_node;
+}
+
+/******************************************************************************/
+/*!
+\brief
+  Inserts a data into the hash table with a key.
 \param Key, the key for the data.
 \param Data, the data to insert.
 */
@@ -58,35 +132,18 @@ void ChHashTable<T>::insert(const char *Key, const T &Data)
 {
   try
   {
-    const auto current_load_factor =
-        ((stats.Count_ + 1) / static_cast<double>(stats.TableSize_));
+    check_resize();
 
-    if (current_load_factor > config.MaxLoadFactor_)
-      grow_table();
-
-    unsigned index = config.HashFunc_(Key, stats.TableSize_);
+    unsigned index = find_index(Key);
     ChHTHeadNode *table_head = &head[index];
-
     ChHTNode *list = table_head->Nodes;
 
     ++stats.Probes_;
 
-    while (list)
-    {
-      ++stats.Probes_;
+    if (find_key_in_list(Key, list))
+      throw HashTableException(HashTableException::E_DUPLICATE, "Trying to insert duplicate item!");
 
-      if (strncmp(Key, list->Key, MAX_KEYLEN) == 0)
-        throw(HashTableException(HashTableException::E_DUPLICATE,
-                                 "Trying to insert duplicate item!"));
-
-      list = list->Next;
-    }
-
-    ChHTNode *new_node = make_node(Data);
-    strncpy(new_node->Key, Key, MAX_KEYLEN);
-
-    new_node->Next = table_head->Nodes;
-    table_head->Nodes = new_node;
+    insert_into_list(Key, Data, table_head->Nodes);
 
     ++table_head->Count;
     ++stats.Count_;
@@ -100,14 +157,37 @@ void ChHashTable<T>::insert(const char *Key, const T &Data)
 /******************************************************************************/
 /*!
 \brief
-  This function removes the data from the hash table with a given key.
+  Removes a node from a given linked list.
+\param current, pointer to the node to be removed.
+\param previous, pointer to the node before the one to be removed.
+\param table_head, pointer to the head node of the linked list.
+*/
+/******************************************************************************/
+template <typename T>
+void ChHashTable<T>::remove_node_from_list(ChHTNode *current, ChHTNode *previous, ChHTHeadNode *table_head)
+{
+  if (previous)
+    previous->Next = current->Next;
+  else
+    table_head->Nodes = current->Next;
+
+  remove_node(current);
+
+  --table_head->Count;
+  --stats.Count_;
+}
+
+/******************************************************************************/
+/*!
+\brief
+  Removes the data from the hash table with a given key.
 \param Key, the key for the data to remove.
 */
 /******************************************************************************/
 template <typename T>
 void ChHashTable<T>::remove(const char *Key)
 {
-  unsigned index = stats.HashFunc_(Key, stats.TableSize_);
+  unsigned index = find_index(Key);
   ChHTHeadNode *table_head = &head[index];
   ChHTNode *current = table_head->Nodes;
   ChHTNode *previous = nullptr;
@@ -118,15 +198,7 @@ void ChHashTable<T>::remove(const char *Key)
 
     if (strncmp(Key, current->Key, MAX_KEYLEN) == 0)
     {
-      if (previous)
-        previous->Next = current->Next;
-      else
-        table_head->Nodes = current->Next;
-
-      remove_node(current);
-
-      --table_head->Count;
-      --stats.Count_;
+      remove_node_from_list(current, previous, table_head);
       return;
     }
 
@@ -138,17 +210,16 @@ void ChHashTable<T>::remove(const char *Key)
 /******************************************************************************/
 /*!
 \brief
-  This function finds a data from the hash table with a key.
-\returns the data if key is found, else a
-  HashTableException::E_ITEM_NOT_FOUND will be thrown.
+  Searches for a key in a given linked list and returns the data if found.
+\param Key, the key to search for.
+\param list, the linked list to search in.
+\returns const T&, the data associated with the key.
+\throws HashTableException, if the key is not found.
 */
 /******************************************************************************/
 template <typename T>
-const T &ChHashTable<T>::find(const char *Key) const
+const T &ChHashTable<T>::search_key_in_list(const char *Key, ChHTNode *list) const
 {
-  unsigned index = stats.HashFunc_(Key, stats.TableSize_);
-  ChHTNode *list = head[index].Nodes;
-
   while (list)
   {
     ++stats.Probes_;
@@ -159,8 +230,24 @@ const T &ChHashTable<T>::find(const char *Key) const
     list = list->Next;
   }
 
-  throw(HashTableException(HashTableException::E_ITEM_NOT_FOUND,
-                           "Key not found!"));
+  throw HashTableException(HashTableException::E_ITEM_NOT_FOUND, "Key not found!");
+}
+
+/******************************************************************************/
+/*!
+\brief
+  Finds a data from the hash table with a key.
+\returns the data if key is found, else a
+  HashTableException::E_ITEM_NOT_FOUND will be thrown.
+*/
+/******************************************************************************/
+template <typename T>
+const T &ChHashTable<T>::find(const char *Key) const
+{
+  unsigned index = find_index(Key);
+  ChHTNode *list = head[index].Nodes;
+
+  return search_key_in_list(Key, list);
 }
 
 /******************************************************************************/
